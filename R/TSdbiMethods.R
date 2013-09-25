@@ -21,12 +21,14 @@ setMethod("dbDisconnect", signature(conn="TSxlsConnection"),
 #######     end kludges   ######
 
 setMethod("TSconnect",   signature(drv="xlsDriver", dbname="character"),
-  definition=function(drv, dbname, 
-     map=list(ids, data, dates, names=NULL, description=NULL,
+  definition= function(drv, dbname, 
+     map=list(ids, data, dates, names=NULL, description=NULL, sheet=1,
               tsrepresentation = function(data,dates){
 		       zoo(data, as.Date(dates))}), ...){
    #  user / password / host  for future consideration
    if (is.null(dbname)) stop("dbname must be specified")
+
+   sheet <- if (is.null(map$sheet)) 1 else map$sheet
 
    if (file.exists(dbname)) {
       file <- dbname
@@ -47,10 +49,10 @@ setMethod("TSconnect",   signature(drv="xlsDriver", dbname="character"),
 
    require("gdata")
 
-   zz <- try(read.xls(file, sheet = 1, verbose=FALSE),  silent=TRUE)
+   zz <- try(read.xls(file, sheet=sheet, verbose=FALSE),  silent=TRUE)
                    #method=c("csv","tsv","tab"), perl="perl")
    if(inherits(zz, "try-error")) 
-         stop("Could read not spreedsheet ",  dbname, zz)
+         stop("Could not read spreedsheet ",  dbname, zz)
 
    #NB The first line provides data frame names, so rows are shifted. 
    #   This fixes so matrix corresponds to spreadsheet cells
@@ -58,10 +60,12 @@ setMethod("TSconnect",   signature(drv="xlsDriver", dbname="character"),
 
    #   Blank rows seem to be skipped, so result is compressed
 
-   # translate cell letters to numbers MAKE LONGER
+   # translate cell letter range to number indices
    jmap <- function(cols){ 
-        charmatch(sub(":[A-Z]*","",cols), LETTERS):
-        charmatch(sub("[A-Z]*:","",cols), LETTERS) 
+	st <- unlist(strsplit(sub(":[A-Z]*","",cols),""))
+	en <- unlist(strsplit(sub("[A-Z]*:","",cols),""))
+	sum(  charmatch(st, LETTERS) * 26^c(0:(length(st)-1))):
+	  sum(charmatch(en, LETTERS) * 26^c(0:(length(en)-1)))
 	}
 
    ids   <- z[map$ids$i,  jmap(map$ids$j)] 

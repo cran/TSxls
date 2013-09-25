@@ -7,6 +7,18 @@ Known BUGS
    o	TSrepresentaion is specified in TSconnect rather than TSget.
 
 
+Changes in TSxls version 2013.8-2
+
+   o	Adjusted Depends and Imports in DESCRIPTION.
+
+Changes in TSxls version 2012.12-1
+
+   o	Add ability to specify a workbook sheet (default=1), suggested 
+   	by Austin Lund.
+
+   o	Modified cell indexing to allow for letter cell indicators longer than
+   	a single letter (bug indicate by Austin Lund). 
+
 Changes in TSxls version 2012.8-1
 
    o	Modified Title in DESCRIPTION file so TSdbi packages will be more
